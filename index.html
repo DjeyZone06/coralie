@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connais-tu vraiment Laura ?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbf5ee; --card:#ffffff; --ink:#3b2f2a; --muted:#8a7a70;
+    --rose:#e8a5a0; --rose-d:#cf7e78; --sage:#9bb59a; --sage-d:#6f9a6e;
+    --gold:#c9a273; --line:#efe3d6; --bad:#e07a6f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Nunito",system-ui,sans-serif;color:var(--ink);overflow-x:hidden;
+    background:linear-gradient(-45deg,#fde3df,#fbf5ee,#e9f1e4,#fbeede);
+    background-size:400% 400%;animation:bgmove 16s ease infinite;
+    min-height:100dvh;display:flex;justify-content:center;
+  }
+  @keyframes bgmove{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+  /* Emojis qui flottent en fond */
+  .floaters{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  .floaters span{position:absolute;bottom:-60px;opacity:.35;animation:rise linear infinite}
+  @keyframes rise{
+    0%{transform:translate(0,0) rotate(0)}
+    25%{transform:translate(18px,-28vh) rotate(15deg)}
+    50%{transform:translate(-14px,-56vh) rotate(-10deg)}
+    75%{transform:translate(16px,-84vh) rotate(12deg)}
+    100%{transform:translate(0,-118vh) rotate(0)}
+  }
+
+  main{position:relative;z-index:1;width:100%;max-width:440px;padding:28px 20px 40px;display:flex;flex-direction:column;justify-content:center;min-height:100dvh}
+  .screen{display:none}
+  .screen.on{display:block}
+  h1,h2{font-family:"Fraunces",Georgia,serif;font-weight:700;line-height:1.15;letter-spacing:-.01em}
+  h1{font-size:2.1rem;margin:14px 0 12px}
+  h2{font-size:1.4rem;margin-bottom:18px}
+  .center{text-align:center}
+  .big-emoji{font-size:4rem;line-height:1;display:inline-block}
+  p.lead{font-size:1.08rem;color:var(--muted);line-height:1.5}
+
+  /* Entrées en cascade */
+  .up{opacity:0;animation:up .6s cubic-bezier(.2,.8,.2,1.2) forwards}
+  .d1{animation-delay:.15s}.d2{animation-delay:.35s}.d3{animation-delay:.55s}.d4{animation-delay:.75s}
+  @keyframes up{from{opacity:0;transform:translateY(24px) scale(.95)}to{opacity:1;transform:none}}
+
+  .float{animation:float 2.6s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-12px) rotate(6deg)}}
+  .drop{animation:drop .9s cubic-bezier(.3,1.6,.5,1) both, float 2.6s ease-in-out .9s infinite}
+  @keyframes drop{from{transform:translateY(-200px) scale(.4);opacity:0}to{transform:none;opacity:1}}
+
+  .card{background:var(--card);border-radius:24px;padding:24px 20px;box-shadow:0 14px 34px rgba(120,80,60,.12);border:1px solid var(--line)}
+  .card.enter{animation:cardIn .5s cubic-bezier(.2,.8,.2,1.15) both}
+  .card.leave{animation:cardOut .35s ease-in both}
+  @keyframes cardIn{from{opacity:0;transform:translateX(60px) rotate(3deg)}to{opacity:1;transform:none}}
+  @keyframes cardOut{to{opacity:0;transform:translateX(-70px) rotate(-4deg)}}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    margin-top:26px;padding:16px 30px;border:0;border-radius:999px;cursor:pointer;
+    font:800 1.05rem "Nunito",sans-serif;color:#fff;background:linear-gradient(135deg,var(--rose),var(--rose-d));
+    box-shadow:0 8px 20px rgba(207,126,120,.35);transition:transform .15s
+  }
+  .btn.pulse{animation:up .6s cubic-bezier(.2,.8,.2,1.2) .75s both, pulse 1.8s ease-in-out 1.4s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 8px 20px rgba(207,126,120,.35),0 0 0 0 rgba(207,126,120,.45);transform:scale(1)}50%{box-shadow:0 8px 20px rgba(207,126,120,.35),0 0 0 14px rgba(207,126,120,0);transform:scale(1.05)}}
+  .btn:active{transform:scale(.94)}
+
+  .progress{position:relative;height:10px;background:rgba(255,255,255,.7);border-radius:99px;margin:6px 0 18px}
+  .progress i{position:relative;display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--rose-d));border-radius:99px;transition:width .6s cubic-bezier(.3,1.4,.5,1)}
+  .progress i::after{content:"🛼";position:absolute;right:-14px;top:-12px;font-size:22px;animation:roll .6s ease-in-out infinite alternate}
+  @keyframes roll{from{transform:rotate(-12deg)}to{transform:rotate(12deg) translateY(-2px)}}
+  .qnum{font-size:.85rem;font-weight:800;color:var(--rose-d);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .opts{display:grid;gap:10px}
+  .opt{
+    width:100%;text-align:left;padding:15px 16px;border-radius:16px;cursor:pointer;
+    border:2px solid var(--line);background:#fffaf6;color:var(--ink);
+    font:600 1.02rem "Nunito",sans-serif;transition:background .2s,border-color .2s,transform .15s;
+    opacity:0;animation:optIn .45s cubic-bezier(.2,.8,.2,1.3) forwards
+  }
+  @keyframes optIn{from{opacity:0;transform:translateY(14px) scale(.92)}to{opacity:1;transform:none}}
+  .opt:active{transform:scale(.97)}
+  .opt.good{background:#e9f3e7;border-color:var(--sage-d);color:#2f5a2e;animation:goodPop .5s cubic-bezier(.3,1.8,.5,1) forwards}
+  .opt.bad{background:#fbe9e6;border-color:var(--bad);color:#9a3b31;opacity:1;animation:shake .45s}
+  .opt:disabled{cursor:default}
+  @keyframes goodPop{0%{transform:scale(1);opacity:1}40%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  @keyframes shake{15%,55%{transform:translateX(-9px) rotate(-1.5deg)}35%,75%{transform:translateX(9px) rotate(1.5deg)}100%{transform:none}}
+  .feedback{min-height:26px;margin-top:14px;font-weight:800;text-align:center}
+  .feedback.good,.feedback.bad{animation:fbPop .4s cubic-bezier(.3,1.8,.5,1)}
+  .feedback.good{color:var(--sage-d)} .feedback.bad{color:var(--bad)}
+  @keyframes fbPop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+
+  /* Paquet cadeau */
+  .gift{position:relative;width:170px;height:170px;margin:34px auto 10px;cursor:pointer;animation:wiggle 1.4s ease-in-out infinite}
+  @keyframes wiggle{0%,60%,100%{transform:rotate(0) scale(1)}65%{transform:rotate(-7deg) scale(1.04)}72%{transform:rotate(7deg) scale(1.04)}79%{transform:rotate(-5deg)}86%{transform:rotate(4deg)}}
+  .gift .box{position:absolute;bottom:0;left:14px;right:14px;height:112px;border-radius:14px;background:linear-gradient(160deg,var(--rose),var(--rose-d));box-shadow:0 14px 26px rgba(160,90,80,.3)}
+  .gift .box::before,.gift .lid::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:24px;transform:translateX(-50%);background:linear-gradient(#f6dfae,#e6c487)}
+  .gift .lid{position:absolute;top:30px;left:4px;right:4px;height:38px;border-radius:12px;background:linear-gradient(160deg,#e39a94,#c97570);z-index:2;box-shadow:0 6px 12px rgba(160,90,80,.25);transition:transform .7s cubic-bezier(.3,1.4,.5,1),opacity .7s}
+  .gift .bow{position:absolute;left:50%;top:-44px;transform:translateX(-50%);font-size:52px}
+  .gift.shake{animation:shakeHard .55s ease-in-out}
+  @keyframes shakeHard{0%,100%{transform:none}20%{transform:rotate(-12deg) scale(1.08)}40%{transform:rotate(12deg) scale(1.12)}60%{transform:rotate(-10deg) scale(1.1)}80%{transform:rotate(8deg) scale(1.05)}}
+  .gift.open{animation:none}
+  .gift.open .lid{transform:translateY(-190px) rotate(-35deg);opacity:0}
+  .gift.gone{animation:giftGone .45s ease-in forwards}
+  @keyframes giftGone{to{transform:scale(0) rotate(20deg);opacity:0}}
+  .tap{color:var(--muted);font-weight:700;animation:blink 1.4s ease-in-out infinite}
+  @keyframes blink{50%{opacity:.35}}
+
+  /* Carte à gratter */
+  #scratch-zone{display:none}
+  #scratch-zone.on{display:block;animation:zoomIn .6s cubic-bezier(.2,.8,.2,1.25) both}
+  @keyframes zoomIn{from{opacity:0;transform:scale(.3) rotate(-8deg)}to{opacity:1;transform:none}}
+  .scratch-wrap{position:relative;width:100%;aspect-ratio:4/3.3;border-radius:22px;overflow:hidden;margin-top:6px;box-shadow:0 16px 34px rgba(120,80,60,.2)}
+  .reveal{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:20px;background:linear-gradient(160deg,#fff4f1,#fdeee4 55%,#eef4ea)
+  }
+  .reveal .e{font-size:3.2rem;display:inline-block}
+  .reveal h3{font-family:"Fraunces",serif;font-size:1.8rem;margin:8px 0 6px;line-height:1.15}
+  .reveal p{font-size:1.1rem;font-weight:700;color:var(--rose-d)}
+  .reveal small{display:block;margin-top:8px;color:var(--muted);font-size:.98rem;font-weight:600}
+  .reveal.celebrate .e{animation:beat 1s ease-in-out infinite}
+  .reveal.celebrate h3{animation:titlePop .8s cubic-bezier(.3,1.8,.5,1) both, glow 2s ease-in-out .8s infinite}
+  .reveal.celebrate p{animation:fbPop .6s cubic-bezier(.3,1.8,.5,1) .25s both}
+  .reveal.celebrate small{animation:fbPop .6s cubic-bezier(.3,1.8,.5,1) .45s both}
+  @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.18)}}
+  @keyframes titlePop{0%{transform:scale(.5)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+  @keyframes glow{50%{text-shadow:0 0 18px rgba(232,165,160,.9)}}
+  #scratch{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab;transition:opacity .9s ease, transform .9s ease}
+  #scratch.gone{opacity:0;transform:scale(1.15);pointer-events:none}
+  .shine{position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.65) 48%,transparent 60%);background-size:260% 100%;animation:shine 2.2s ease-in-out infinite;transition:opacity .4s}
+  @keyframes shine{from{background-position:130% 0}to{background-position:-130% 0}}
+  .hint{margin-top:12px;color:var(--muted);font-size:.92rem;text-align:center;opacity:0;transition:opacity .5s}
+  .after{opacity:0;transform:translateY(16px);transition:all .8s cubic-bezier(.2,.8,.2,1.2) .6s;margin-top:22px}
+  .after.on{opacity:1;transform:none}
+
+  .recap{margin-top:6px;padding:18px 18px 14px;text-align:left}
+  .recap-head{font-size:.85rem;font-weight:800;color:var(--rose-d);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);opacity:0}
+  .row.on{animation:rowIn .5s cubic-bezier(.2,.8,.2,1.3) forwards}
+  @keyframes rowIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
+  .row .lab{font-weight:700}
+  .row .res{font-weight:800;white-space:nowrap}
+  .row .res.ok{color:var(--sage-d)} .row .res.ko{color:var(--bad)}
+  .recap-total{margin-top:12px;font-weight:800;font-size:1.05rem;text-align:center;opacity:0}
+  .recap-total.on{animation:fbPop .5s cubic-bezier(.3,1.8,.5,1) forwards}
+  .recap-total b{font-family:"Fraunces",serif;font-size:1.6rem;display:inline-block;min-width:1.2em}
+  .res-msg{margin-top:18px;opacity:0;font-weight:600;color:var(--ink)}
+  .res-msg.on{animation:fbPop .6s cubic-bezier(.3,1.8,.5,1) forwards}
+  #open-gift.on{opacity:1!important;animation:fbPop .5s cubic-bezier(.3,1.8,.5,1), pulse 1.8s ease-in-out .6s infinite}
+  #fx{position:fixed;inset:0;pointer-events:none;z-index:20}
+
+  @media (prefers-reduced-motion: reduce){
+    .floaters{display:none}
+    body{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="floaters" id="floaters"></div>
+<canvas id="fx"></canvas>
+<main>
+
+  <!-- Accueil -->
+  <section class="screen on center" id="s-intro">
+    <div class="up"><span class="big-emoji float">💌</span></div>
+    <h1 class="up d1" id="intro-title"></h1>
+    <p class="lead up d2" id="intro-text"></p>
+    <button class="btn pulse" id="start">C'est parti ✨</button>
+  </section>
+
+  <!-- Questions -->
+  <section class="screen" id="s-quiz">
+    <div class="progress"><i id="bar"></i></div>
+    <div class="card" id="qcard">
+      <div class="qnum" id="qnum"></div>
+      <h2 id="qtext"></h2>
+      <div class="opts" id="opts"></div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  </section>
+
+  <!-- Félicitations -->
+  <section class="screen center" id="s-bravo">
+    <span class="big-emoji drop" id="res-emoji">🏆</span>
+    <h1 class="up d1" id="res-title"></h1>
+    <div class="card recap up d2">
+      <div class="recap-head">Ton récap'</div>
+      <div id="recap-rows"></div>
+      <div class="recap-total" id="recap-total"></div>
+    </div>
+    <p class="lead res-msg" id="res-msg"></p>
+    <button class="btn" id="open-gift" style="opacity:0">Découvrir mon cadeau 🎁</button>
+  </section>
+
+  <!-- Cadeau -->
+  <section class="screen center" id="s-gift">
+    <div id="gift-zone">
+      <h2 class="up">Un cadeau t'attend… 🤫</h2>
+      <div class="up d1">
+        <div class="gift" id="gift">
+          <div class="lid"><div class="bow">🎀</div></div>
+          <div class="box"></div>
+        </div>
+      </div>
+      <p class="tap">Touche le paquet pour l'ouvrir</p>
+    </div>
+
+    <div id="scratch-zone">
+      <h2 style="margin-bottom:6px">Gratte ta carte ✨</h2>
+      <p class="lead" style="margin-bottom:16px">Avec ton doigt, doucement…</p>
+      <div class="scratch-wrap" id="scratch-wrap">
+        <div class="reveal" id="reveal">
+          <div class="e" id="rev-emoji"></div>
+          <h3 id="rev-title"></h3>
+          <p id="rev-text"></p>
+          <small id="rev-date"></small>
+        </div>
+        <canvas id="scratch"></canvas>
+        <div class="shine" id="shine"></div>
+      </div>
+      <p class="hint" id="hint">Continue, tu y es presque 👀</p>
+      <div class="after" id="after">
+        <p class="lead" id="after-text"></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============================================================
+   CONFIGURATION — tout ce qui est à personnaliser est ici
+   ============================================================ */
+const CONFIG = {
+  friend: "Coralie",
+  person: "Laura",
+
+  introTitle: "Coralie, connais-tu vraiment Laura ?",
+  introText: "3 souvenirs, 3 questions. Seul un sans-faute débloque ton cadeau… 🎁",
+
+  // "answer" = numéro de la bonne réponse dans "options" (0 = la première)
+  // L'ordre des réponses est mélangé à chaque partie.
+  questions: [
+    { label: "Le lycée 🎒", q: "Retour au lycée 🎒 En quelle classe est née ton amitié avec Laura ?",
+      options: ["En Seconde", "En Première", "En Terminale"], answer: 1 },
+    { label: "Le cadeau de l'ex 👛", q: "Le jour où son ex a voulu lui offrir un cadeau, Laura a hésité pendant 3 heures… 🙄 Avec quoi est-elle finalement repartie ?",
+      options: ["Un parapluie ☂️", "Un porte-monnaie 👛", "Une paire de chaussures 👠"], answer: 1 },
+    { label: "Le roller 🛼", q: "Souvenir de roller 🛼 Ce jour-là, Laura a fait une victime… Qu'est-ce qu'elle t'a cassé ?",
+      options: ["Ton téléphone 📱", "Ton sac à dos Roxy 🎒", "Ta montre ⌚"], answer: 1 }
+  ],
+
+  // La surprise sous la carte à gratter
+  reveal: {
+    emoji: "🤰💛",
+    title: "Laura est enceinte !",
+    text: "Tu vas être tata de cœur 🥰",
+    date: "Arrivée prévue : juillet 2027 👶"
+  },
+  afterText: "Appelle vite Laura, elle attend ta réaction ! 📞",
+
+  // Message de fin de quiz selon le nombre d'erreurs
+  results: {
+    perfect: { emoji: "🏆", title: "Sans-faute !",
+      msg: "Zéro erreur 💯 Tu connais Laura par cœur… Tu mérites largement ton cadeau !" },
+    few:     { emoji: "😋", title: "Presque parfait !",
+      msg: "Allez, Laura te pardonne 😋 Personne n'est parfait… Ton cadeau t'attend quand même !" },
+    many:    { emoji: "🐠", title: "Aïe aïe aïe…",
+      msg: "Diagnostic : mémoire de poisson rouge 🐠 Laura te prescrit une consultation urgente chez le médecin 🩺… mais rassure-toi, elle t'aime quand même 💛" }
+  }
+};
+
+/* ---------- Notifications en direct (application ntfy) ----------
+   Chaque étape envoie une notification sur le téléphone abonné au sujet ci-dessous.
+   Ajouter ?test à la fin du lien pour tester : les notifications sont marquées [TEST]. */
+const NOTIFY = { enabled: true, topic: "jeu-laura-it5qfzjw1a" };
+const TEST = /test/i.test(location.search + location.hash);
+function notify(msg, title, tags, prio){
+  if(!NOTIFY.enabled) return;
+  const q = new URLSearchParams({ title: (TEST ? '[TEST] ' : '') + title, tags: tags || '', priority: String(prio || 3) });
+  try{ fetch('https://ntfy.sh/' + NOTIFY.topic + '?' + q, { method:'POST', body: msg, keepalive:true }).catch(()=>{}); }catch(_){}
+}
+function device(){
+  const u = navigator.userAgent;
+  return /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : /Mac/.test(u) ? 'Mac' : /Windows/.test(u) ? 'PC' : 'appareil inconnu';
+}
+const hhmm = () => new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+(function(){
+  let n = 0; try{ n = +localStorage.getItem('jeu-opens') || 0; localStorage.setItem('jeu-opens', n+1); }catch(_){}
+  notify(n ? `Coralie a rouvert le lien (${n+1}e fois) à ${hhmm()}, sur ${device()}.` : `Coralie vient d'ouvrir le lien à ${hhmm()}, sur ${device()} 👀`,
+         n ? 'Lien rouvert' : 'Lien ouvert !', 'eyes', 4);
+})();
+
+const GOOD = ["Bravo ! 👏", "Évidemment ! 😎", "Tu gères 💪", "Exactement ✨", "Trop forte 🙌"];
+const BAD  = ["Raté ! Laura est vexée 😤 Réessaie", "Hmm… vraiment ? 🤨 Encore une chance", "Laura n'en revient pas 😱 Réessaie", "Pas du tout ! 🙈 Allez, concentre-toi"];
+
+/* ============================================================ */
+const $ = s => document.querySelector(s);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const rnd = (a,b) => a + Math.random()*(b-a);
+const buzz = p => { try{ navigator.vibrate && navigator.vibrate(p); }catch(_){} };
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+function center(el){ const r = el.getBoundingClientRect(); return {x:r.left + r.width/2, y:r.top + r.height/2}; }
+
+/* ---------- Emojis flottants en fond ---------- */
+(function(){
+  const f = $('#floaters'), set = ['💛','✨','🌸','🎀','🫧','💕','🎉','⭐'];
+  for(let i=0;i<16;i++){
+    const s = document.createElement('span');
+    s.textContent = pick(set);
+    s.style.left = rnd(0,96) + '%';
+    s.style.fontSize = rnd(16,32) + 'px';
+    const d = rnd(11,20);
+    s.style.animationDuration = d + 's';
+    s.style.animationDelay = (-rnd(0,d)) + 's';
+    f.appendChild(s);
+  }
+})();
+
+/* ---------- Moteur de particules (confettis, étincelles, emojis) ---------- */
+const fx = $('#fx'), fctx = fx.getContext('2d');
+let parts = [], running = false;
+function sizeFx(){ const d = Math.min(devicePixelRatio||1,2); fx.width = innerWidth*d; fx.height = innerHeight*d; fctx.setTransform(d,0,0,d,0,0); }
+addEventListener('resize', sizeFx); sizeFx();
+const COLS = ['#e8a5a0','#cf7e78','#9bb59a','#f3d9a4','#c9a273','#f6c1d0','#ffffff','#b9d4ec'];
+function add(p){
+  parts.push(Object.assign({rot:rnd(0,6), vr:rnd(-.25,.25), g:.3, drag:.99, life:120, max:120, size:rnd(5,10), c:pick(COLS), kind:pick(['rect','rect','circle'])}, p));
+  if(!running){ running = true; requestAnimationFrame(loop); }
+}
+function loop(){
+  fctx.clearRect(0,0,innerWidth,innerHeight);
+  parts = parts.filter(p => p.life > 0 && p.y < innerHeight + 60);
+  for(const p of parts){
+    p.vy += p.g; p.vx *= p.drag; p.vy *= p.drag; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life--;
+    fctx.globalAlpha = Math.min(1, p.life / 25);
+    fctx.save(); fctx.translate(p.x, p.y); fctx.rotate(p.rot);
+    if(p.kind === 'emoji'){ fctx.font = p.size + 'px serif'; fctx.textAlign='center'; fctx.textBaseline='middle'; fctx.fillText(p.e, 0, 0); }
+    else if(p.kind === 'star'){ fctx.fillStyle = p.c; star(p.size); }
+    else if(p.kind === 'circle'){ fctx.fillStyle = p.c; fctx.beginPath(); fctx.arc(0,0,p.size/2,0,7); fctx.fill(); }
+    else { fctx.fillStyle = p.c; fctx.fillRect(-p.size/2,-p.size/4,p.size,p.size/2); }
+    fctx.restore();
+  }
+  fctx.globalAlpha = 1;
+  if(parts.length) requestAnimationFrame(loop); else { running = false; fctx.clearRect(0,0,innerWidth,innerHeight); }
+}
+function star(s){
+  fctx.beginPath();
+  for(let i=0;i<8;i++){ const r = i%2 ? s*.35 : s; const a = i*Math.PI/4; fctx.lineTo(Math.cos(a)*r, Math.sin(a)*r); }
+  fctx.closePath(); fctx.fill();
+}
+function burst(x, y, n, o={}){
+  for(let i=0;i<n;i++){
+    const a = rnd(0, Math.PI*2), sp = rnd(3, o.speed || 11);
+    add(Object.assign({x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - (o.up||4), life:rnd(60,110)},
+      o.emojis && Math.random() < .35 ? {kind:'emoji', e:pick(o.emojis), size:rnd(18,30), vr:rnd(-.08,.08)} : {}));
+  }
+}
+function rain(ms, emojis){
+  const end = performance.now() + ms;
+  (function drip(){
+    for(let i=0;i<5;i++){
+      const em = emojis && Math.random() < .3;
+      add(Object.assign({x:rnd(0,innerWidth), y:-20, vx:rnd(-1.5,1.5), vy:rnd(1,4), g:.06, drag:1, life:400},
+        em ? {kind:'emoji', e:pick(emojis), size:rnd(20,34), vr:rnd(-.05,.05)} : {}));
+    }
+    if(performance.now() < end) setTimeout(drip, 70);
+  })();
+}
+
+/* ---------- Accueil ---------- */
+$('#intro-title').textContent = CONFIG.introTitle;
+$('#intro-text').textContent = CONFIG.introText;
+let qi = 0, errors = 0;
+const errs = CONFIG.questions.map(()=>0);
+
+$('#start').onclick = e => {
+  notify('Elle a lancé le quiz ✨', 'Quiz commencé', 'sparkles', 3);
+  const p = center(e.currentTarget); burst(p.x, p.y, 40, {emojis:['✨','💛']}); buzz(20);
+  setTimeout(()=>{ show('#s-quiz'); renderQ(); }, 350);
+};
+
+/* ---------- Questions ---------- */
+function renderQ(){
+  const Q = CONFIG.questions[qi], n = CONFIG.questions.length;
+  $('#bar').style.width = Math.max(4, qi / n * 100) + '%';
+  $('#qnum').textContent = `Question ${qi+1} / ${n}`;
+  $('#qtext').textContent = Q.q;
+  $('#fb').textContent = ''; $('#fb').className = 'feedback';
+  const box = $('#opts'); box.innerHTML = '';
+  const order = Q.options.map((_,i)=>i).sort(()=>Math.random()-.5);
+  order.forEach((i, k) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.textContent = Q.options[i];
+    b.style.animationDelay = (.25 + k*.12) + 's';
+    b.onclick = () => answer(b, i === Q.answer);
+    box.appendChild(b);
+  });
+  const card = $('#qcard');
+  card.classList.remove('leave','enter'); void card.offsetWidth; card.classList.add('enter');
+}
+
+function answer(btn, ok){
+  const fb = $('#fb'), p = center(btn);
+  fb.classList.remove('good','bad'); void fb.offsetWidth;
+  const Qn = CONFIG.questions[qi], tag = `Q${qi+1} (${Qn.label || 'question ' + (qi+1)})`;
+  if(ok){
+    notify(`✅ ${btn.textContent}` + (errs[qi] ? ` — après ${errs[qi]} erreur${errs[qi]>1?'s':''}` : ' — du 1er coup !'), `${tag} : bonne réponse`, 'white_check_mark', 3);
+    btn.style.animationDelay = '0s';
+    btn.classList.add('good');
+    document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+    fb.textContent = pick(GOOD); fb.classList.add('good');
+    burst(p.x, p.y, 45, {emojis:['🎉','✨','💛','👏']});
+    buzz(30);
+    setTimeout(()=>{
+      qi++;
+      if(qi < CONFIG.questions.length){
+        $('#qcard').classList.add('leave');
+        setTimeout(renderQ, 330);
+      } else finishQuiz();
+    }, 1100);
+  } else {
+    errors++; errs[qi]++;
+    notify(`❌ Elle a répondu : ${btn.textContent}`, `${tag} : erreur`, 'x', 3);
+    btn.style.animationDelay = '0s';
+    btn.classList.remove('bad'); void btn.offsetWidth; btn.classList.add('bad');
+    btn.disabled = true;
+    fb.textContent = pick(BAD); fb.classList.add('bad');
+    for(let i=0;i<3;i++) add({kind:'emoji', e:pick(['😤','🙈','😱','🤨']), x:p.x + rnd(-60,60), y:p.y, vx:rnd(-1,1), vy:rnd(-5,-3), g:.05, size:rnd(24,32), life:70, vr:rnd(-.05,.05)});
+    buzz([40,40,40]);
+  }
+}
+
+function finishQuiz(){
+  $('#bar').style.width = '100%';
+  const R = CONFIG.results, res = errors === 0 ? R.perfect : errors <= 2 ? R.few : R.many;
+  $('#res-emoji').textContent = res.emoji;
+  $('#res-title').textContent = res.title;
+  $('#res-msg').textContent = res.msg;
+  const rows = $('#recap-rows'); rows.innerHTML = '';
+  CONFIG.questions.forEach((Q, k) => {
+    const r = document.createElement('div'); r.className = 'row';
+    const e = errs[k];
+    r.innerHTML = `<span class="lab"></span><span class="res ${e ? 'ko' : 'ok'}">${e ? '❌ ' + e + ' erreur' + (e>1?'s':'') : '✅ Du 1er coup'}</span>`;
+    r.querySelector('.lab').textContent = Q.label || ('Question ' + (k+1));
+    rows.appendChild(r);
+  });
+  notify(`${errors} erreur${errors>1?'s':''} au total. Message affiché : « ${res.title} »`, 'Quiz terminé', 'trophy', 4);
+  $('#recap-total').innerHTML = `Total : <b id="cnt">0</b> erreur${errors>1?'s':''}`;
+  $('#qcard').classList.add('leave');
+
+  setTimeout(()=>{
+    show('#s-bravo'); buzz([30,60,30]);
+    // lignes du récap une par une
+    const list = rows.querySelectorAll('.row');
+    list.forEach((r,k)=>setTimeout(()=>{ r.classList.add('on'); buzz(15); }, 900 + k*450));
+    const tTotal = 900 + list.length*450 + 200;
+    // compteur d'erreurs qui défile
+    setTimeout(()=>{
+      $('#recap-total').classList.add('on');
+      let n = 0; const cnt = $('#cnt');
+      const tick = () => { cnt.textContent = n; if(n < errors){ n++; setTimeout(tick, 180); } };
+      tick();
+    }, tTotal);
+    const tMsg = tTotal + 300 + errors*180 + 300;
+    setTimeout(()=>{
+      $('#res-msg').classList.add('on');
+      const p = center($('#res-msg'));
+      if(errors === 0){ rain(3000, ['🎉','✨','🏆','💯']); burst(innerWidth/2, innerHeight*.3, 80, {speed:14}); }
+      else if(errors <= 2){ rain(2000, ['😋','💛','✨']); burst(p.x, p.y, 40, {emojis:['😋','💛']}); }
+      else { rain(2200, ['🐠','🩺','💊','💛']); burst(p.x, p.y, 30, {emojis:['🐠','💛']}); }
+    }, tMsg);
+    setTimeout(()=>$('#open-gift').classList.add('on'), tMsg + 900);
+  }, 400);
+}
+
+/* ---------- Paquet cadeau ---------- */
+$('#open-gift').onclick = e => {
+  const r = CONFIG.reveal;
+  $('#rev-emoji').textContent = r.emoji;
+  $('#rev-title').textContent = r.title;
+  $('#rev-text').textContent = r.text;
+  $('#rev-date').textContent = r.date || '';
+  $('#after-text').textContent = CONFIG.afterText;
+  const p = center(e.currentTarget); burst(p.x, p.y, 30); buzz(20);
+  setTimeout(()=>show('#s-gift'), 300);
+};
+
+let giftOpened = false;
+$('#gift').onclick = () => {
+  if(giftOpened) return; giftOpened = true;
+  notify('Elle ouvre le paquet, la carte à gratter arrive…', 'Cadeau ouvert 🎁', 'gift', 4);
+  const g = $('#gift'); buzz([30,30,30,30,60]);
+  g.classList.add('shake');
+  setTimeout(()=>{
+    g.classList.remove('shake'); g.classList.add('open');
+    const p = center(g); burst(p.x, p.y - 30, 90, {speed:14, up:6, emojis:['✨','🎀','💛']});
+    for(let i=0;i<18;i++) add({kind:'star', c:pick(['#f3d9a4','#ffffff','#e6c487']), x:p.x, y:p.y-20, vx:rnd(-6,6), vy:rnd(-10,-3), size:rnd(5,10), g:.15, life:90});
+  }, 560);
+  setTimeout(()=>{ g.classList.add('gone'); document.querySelector('.tap').style.visibility = 'hidden'; }, 1250);
+  setTimeout(()=>{
+    $('#gift-zone').style.display = 'none';
+    $('#scratch-zone').classList.add('on');
+    requestAnimationFrame(()=>requestAnimationFrame(initScratch));
+  }, 1650);
+};
+
+/* ---------- Carte à gratter ---------- */
+function initScratch(){
+  const c = $('#scratch');
+  const W = c.offsetWidth, H = c.offsetHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c.width = W*dpr; c.height = H*dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const g = ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'#cfae84'); g.addColorStop(.45,'#f1e1c6'); g.addColorStop(.55,'#ead5b2'); g.addColorStop(1,'#bf9a6b');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<180;i++){
+    ctx.fillStyle = `rgba(255,255,255,${Math.random()*.6})`;
+    ctx.beginPath(); ctx.arc(Math.random()*W, Math.random()*H, Math.random()*1.8+.4, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.font = '22px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ['✨','💛','✨','🎀'].forEach((e,i)=>{ ctx.globalAlpha=.55; ctx.fillText(e, [36,W-36,W-40,40][i], [34,38,H-34,H-36][i]); });
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2; ctx.setLineDash([6,6]);
+  ctx.strokeRect(12,12,W-24,H-24); ctx.setLineDash([]);
+  ctx.fillStyle = '#6e5232';
+  ctx.font = '700 30px Fraunces, Georgia, serif'; ctx.fillText('Gratte ici ✨', W/2, H/2 - 8);
+  ctx.font = '600 15px Nunito, sans-serif'; ctx.fillStyle = '#7d6142';
+  ctx.fillText('avec ton doigt', W/2, H/2 + 22);
+
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 46;
+  ctx.strokeStyle = '#000'; ctx.fillStyle = '#000';
+
+  let last = null, moves = 0, done = false, touched = false;
+  const pos = e => { const r = c.getBoundingClientRect(), k = W / r.width; return {x:(e.clientX - r.left)*k, y:(e.clientY - r.top)*k}; };
+  const dot = p => { ctx.beginPath(); ctx.arc(p.x, p.y, 23, 0, Math.PI*2); ctx.fill(); };
+  const sparkle = e => add({kind: Math.random()<.5 ? 'star' : 'circle', c:pick(['#f3d9a4','#ffffff','#e6c487','#c9a273']), x:e.clientX + rnd(-10,10), y:e.clientY + rnd(-10,10), vx:rnd(-2.5,2.5), vy:rnd(-3,0), g:.18, size:rnd(3,7), life:rnd(30,55)});
+
+  c.addEventListener('pointerdown', e => {
+    if(done) return;
+    try{ c.setPointerCapture(e.pointerId); }catch(_){}
+    last = pos(e); dot(last); sparkle(e);
+    if(!touched){
+      touched = true; $('#shine').style.opacity = 0;
+      notify('Elle commence à gratter… 👀', 'Grattage en cours', 'eyes', 4);
+      setTimeout(()=>{ if(!done) $('#hint').style.opacity = 1; }, 2500);
+    }
+  });
+  c.addEventListener('pointermove', e => {
+    if(!last || done) return;
+    const p = pos(e);
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    last = p;
+    if(moves % 2 === 0) sparkle(e);
+    if(++moves % 8 === 0){ check(); if(moves % 24 === 0) buzz(5); }
+  });
+  const end = () => { last = null; check(); };
+  c.addEventListener('pointerup', end);
+  c.addEventListener('pointercancel', end);
+
+  function check(){
+    if(done) return;
+    const d = ctx.getImageData(0,0,c.width,c.height).data;
+    let clear = 0, total = 0;
+    for(let i=3; i<d.length; i+=4*24){ total++; if(d[i] < 40) clear++; }
+    if(clear/total > 0.5) celebrate();
+  }
+
+  function celebrate(){
+    done = true;
+    notify(`Elle a découvert la surprise à ${hhmm()} ! Prépare-toi, elle va sûrement appeler 📞`, 'SURPRISE DÉCOUVERTE 🎉', 'tada,baby', 5);
+    c.classList.add('gone'); $('#hint').style.opacity = 0;
+    $('#reveal').classList.add('celebrate');
+    buzz([60,40,60,40,200]);
+    const p = center($('#scratch-wrap'));
+    burst(p.x, p.y, 120, {speed:16, up:6, emojis:['💛','🍼','👶','🎉','✨','🥰']});
+    setTimeout(()=>burst(innerWidth*.15, innerHeight*.75, 50, {speed:12, up:8}), 500);
+    setTimeout(()=>burst(innerWidth*.85, innerHeight*.75, 50, {speed:12, up:8}), 800);
+    rain(6000, ['💛','🍼','👶','🎉','💕','✨']);
+    $('#after').classList.add('on');
+  }
+}
+</script>
+</body>
+</html>
